@@ -17,22 +17,55 @@ namespace SudokuSolver.Logics
         /// <returns></returns>
         public int[][] Solve(int[][] sudoku)
         {
-            for (int x = 0; x < sudoku.Length; x++)
+            while (true)
             {
-                for (int y = 0; y < sudoku.Length; y++)
-                {
-                    if (CheckIfEmpty(sudoku, x, y)) {
-                        List<int> exclude = CheckX(sudoku, y);
-                        exclude = AddList(exclude, CheckY(sudoku, x));
-                        exclude = AddList(exclude, CheckGrid(sudoku, 3, 3, x, y));
+                List<int[][]> sudokuList = SolveSudoku(sudoku);
 
-                    }
+                if (sudokuList.Count == 1) {
+                    break;
                 }
             }
             return sudoku;
         }
 
+        public List<int[][]> SolveSudoku(int[][] sudoku) {
+            List<int[][]> sudokuList = new List<int[][]>();
+            for (int x = 0; x < sudoku.Length; x++)
+            {
+                for (int y = 0; y < sudoku.Length; y++)
+                {
+                    if (!CheckIfEmpty(sudoku, x, y))
+                    {
+                        List<int> exclude = CheckX(sudoku, y);
+                        exclude = AddList(exclude, CheckY(sudoku, x));
+                        exclude = AddList(exclude, CheckGrid(sudoku, 3, 3, x, y));
+                        List<int> toAdd = RemoveNumbers(exclude, new List<int> { 1, 2, 3, 4, 5, 6, 7, 8, 9 });
+                        foreach (var item in toAdd)
+                        {
+                            sudoku[y][x] = item;
+                            sudokuList.Add(sudoku);
+                        }
+                    }
+                }
+            }
+            return sudokuList;
+        }
 
+        public List<int> RemoveNumbers(List<int> exclude, List<int> toExcludeFrom)
+        {
+            foreach (var item in exclude)
+            {
+                try
+                {
+                    toExcludeFrom.RemoveAt(toExcludeFrom.FindIndex(x => x == item));
+                }
+                catch (Exception e)
+                {
+                    Debug.WriteLine(e.ToString());
+                }
+            }
+            return toExcludeFrom;
+        }
 
         /// <summary>
         /// Check if the given position int the given sudoku is empty.
