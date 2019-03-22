@@ -15,47 +15,24 @@ namespace SudokuSolver.Logics
         /// <param name="sudoku"> The unsolved sudoku</param>
         /// <returns></returns>
         public int[][] Solve(int[][] sudoku) {
-            List<int[][]> sudokuList = new List<int[][]>();
-            bool firstRun = true;
-            sudokuList.Add(sudoku);
-
-            List<int[][]> sudokuListTemp = new List<int[][]>();
+            List<int[][]> sudokuList = new List<int[][]> { sudoku };
             for (int x = 0; x < sudoku.Length; x++)
             {
-                for (int y = 0; y < sudoku.Length; y++)
+                for (int y = 0; y < sudoku[x].Length; y++)
                 {
-                    foreach (var item in sudokuList)
-                    {
-                        if (firstRun)
+                    if (!CheckIfEmpty(sudoku,x,y)) {
+                        
+                        List<int[][]> editedSudokus = new List<int[][]>();
+                        foreach (var sudokuItem in sudokuList)
                         {
-                            sudokuList = SolveSudoku(item, x, y);
-                            if (sudokuList.Count > 0) {
-                                firstRun = false;
-                            }
-                            else
-                            {
-                                sudokuList.Add(sudoku);
-                            }
+                            editedSudokus.AddRange(SolveSudoku(sudokuItem, x, y));
+                            Debug.WriteLine(x.ToString() + "-----" + y.ToString());
                         }
-                        else
-                        {
-                            sudokuList.AddRange(SolveSudoku(item, x, y));
-                            foreach (var spot in sudokuList)
-                            {
-                                Debug.WriteLine("--");
-                                foreach (var spotX in spot)
-                                {
-                                    foreach (var spotY in spotX)
-                                    {
-                                        Debug.Write(spotY.ToString());
-                                    }
-                                    Debug.WriteLine("");
-                                }
-                            }
-                        }
+                        sudokuList = editedSudokus;
                     }
                 }
             }
+            
 
             sudoku = sudokuList.Last() ;
             return sudoku;
@@ -72,20 +49,11 @@ namespace SudokuSolver.Logics
                 List<int> toAdd = RemoveNumbers(exclude, new List<int> { 1, 2, 3, 4, 5, 6, 7, 8, 9 });
                 foreach (var item in toAdd)
                 {
-                    sudokuList.Add(sudoku);
+                    sudokuList.Add(DeepClone(sudoku));
                 }
                 for (int i = 0; i < toAdd.Count; i++)
                 {
                     sudokuList[i][y][x] = toAdd[i];
-                    foreach (var spotX in sudokuList[i])
-                    {
-                        foreach (var spotY in spotX)
-                        {
-                            Debug.Write(spotY.ToString());
-                        }
-                        Debug.WriteLine("");
-                    }
-
                 }
             }
             return sudokuList;
@@ -95,12 +63,8 @@ namespace SudokuSolver.Logics
         {
             foreach (var item in exclude)
             {
-                try
-                {
+                if (toExcludeFrom.FindIndex(x => x == item) > -1) {
                     toExcludeFrom.RemoveAt(toExcludeFrom.FindIndex(x => x == item));
-                }
-                catch (Exception e)
-                {
                 }
             }
             return toExcludeFrom;
@@ -208,6 +172,15 @@ namespace SudokuSolver.Logics
             return exclude;
         }
 
+        public int[][] DeepClone(int[][] arrayToClone)
+        {
+            int[][] newArray = new int[arrayToClone.Length][];
+            for (int i = 0; i < newArray.Length; i++)
+            {
+                newArray[i] = (int[])arrayToClone[i].Clone();
+            }
+            return newArray;
+        }
 
         public int[][] Create(int[][] sudoku)
         {
