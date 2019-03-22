@@ -15,7 +15,7 @@ namespace SudokuSolver.Logics
         /// <param name="sudoku"> The unsolved sudoku</param>
         /// <returns></returns>
         public int[][] Solve(int[][] sudoku) {
-            List<int[][]> sudokuList = new List<int[][]> { sudoku };
+            List<int[][]> sudokuList = new List<int[][]> { sudoku, sudoku };
             for (int x = 0; x < sudoku.Length; x++)
             {
                 for (int y = 0; y < sudoku[x].Length; y++)
@@ -23,11 +23,12 @@ namespace SudokuSolver.Logics
                     if (!CheckIfEmpty(sudoku,x,y)) {
                         
                         List<int[][]> editedSudokus = new List<int[][]>();
-                        foreach (var sudokuItem in sudokuList)
-                        {
-                            editedSudokus.AddRange(SolveSudoku(sudokuItem, x, y));
-                            Debug.WriteLine(x.ToString() + "-----" + y.ToString());
-                        }
+
+                        Sudoku sudokuToSolve = CheckSudoku(sudokuList[0], sudokuList[1], x, y);
+                        Debug.WriteLine(x.ToString() + "-----" + y.ToString());
+                        
+
+
                         sudokuList = editedSudokus;
                     }
                 }
@@ -38,25 +39,30 @@ namespace SudokuSolver.Logics
             return sudoku;
         }
 
-        public List<int[][]> SolveSudoku(int[][] sudoku,int x,int y) {
+        public int[][] SolveSudoku(Sudoku sudoku)
+        {
+            if (sudoku.ToAdd.Count > 0) {
+                return
+            }
+            else
+            {
+                return
+            }
+             
+        }
+
+        public Sudoku CheckSudoku(int[][] sudoku, int[][] backUpSudoku, int x,int y) {
             List<int[][]> sudokuList = new List<int[][]>();
-            
+            Sudoku sudokus = new Sudoku(sudoku, backUpSudoku, new List<int> {});
             if (!CheckIfEmpty(sudoku, x, y))
             {
                 List<int> exclude = CheckX(sudoku, y);
                 exclude = AddList(exclude, CheckY(sudoku, x));
                 exclude.AddRange(CheckGrid(sudoku, 3, 3, x, y));
                 List<int> toAdd = RemoveNumbers(exclude, new List<int> { 1, 2, 3, 4, 5, 6, 7, 8, 9 });
-                foreach (var item in toAdd)
-                {
-                    sudokuList.Add(DeepClone(sudoku));
-                }
-                for (int i = 0; i < toAdd.Count; i++)
-                {
-                    sudokuList[i][y][x] = toAdd[i];
-                }
+                sudokus = new Sudoku(sudoku, backUpSudoku, toAdd);
             }
-            return sudokuList;
+            return sudokus;
         }
 
         public List<int> RemoveNumbers(List<int> exclude, List<int> toExcludeFrom)
@@ -185,6 +191,19 @@ namespace SudokuSolver.Logics
         public int[][] Create(int[][] sudoku)
         {
             return sudoku;
+        }
+    }
+
+    public class Sudoku
+    {
+        public int[][] UnsolvedSudoku { get; set; }
+        public int[][] BackupSudoku { get; set; }
+        public List<int> ToAdd { get; set; }
+
+        public Sudoku(int[][] unsolvedSudoku, int[][] backupSudoku, List<int> toAdd) {
+            UnsolvedSudoku = unsolvedSudoku;
+            BackupSudoku = backupSudoku;
+            ToAdd = toAdd;
         }
     }
 }
