@@ -15,18 +15,19 @@ namespace SudokuSolver.Logics
         /// <param name="sudoku"> The unsolved sudoku</param>
         /// <returns></returns>
         public int[][] Solve(int[][] sudoku) {
-            List<int[][]> sudokuList = new List<int[][]> { sudoku };
-            for (int x = 0; x < sudoku.Length; x++)
+            uint[][] uSudoku = (uint[][])(object)sudoku;
+            List<uint[][]> sudokuList = new List<uint[][]> { uSudoku };
+            for (int x = 0; x < uSudoku.Length; x++)
             {
-                for (int y = 0; y < sudoku[x].Length; y++)
+                for (int y = 0; y < uSudoku[x].Length; y++)
                 {
-                    if (!CheckIfEmpty(sudoku,x,y)) {
+                    if (!CheckIfEmpty(uSudoku, x,y)) {
                         
-                        List<int[][]> editedSudokus = new List<int[][]>();
+                        List<uint[][]> editedSudokus = new List<uint[][]>();
                         foreach (var sudokuItem in sudokuList)
                         {
                             editedSudokus.AddRange(SolveSudoku(sudokuItem, x, y));
-                            Debug.WriteLine(x.ToString() + "-----" + y.ToString());
+                            //Debug.WriteLine(x.ToString() + "-----" + y.ToString());
                         }
                         sudokuList = editedSudokus;
                     }
@@ -34,19 +35,40 @@ namespace SudokuSolver.Logics
             }
             
 
-            sudoku = sudokuList.Last() ;
+            sudoku = (int[][])(object)sudokuList.Last();
             return sudoku;
         }
 
-        public List<int[][]> SolveSudoku(int[][] sudoku,int x,int y) {
-            List<int[][]> sudokuList = new List<int[][]>();
+
+        public uint[][] ConvertIntSudoku(int[][] arrayToClone)
+        {
+            uint[][] newArray = new uint[arrayToClone.Length][];
+            for (int i = 0; i < newArray.Length; i++)
+            {
+                newArray[i] = (uint[])arrayToClone[i].Clone();
+            }
+            return newArray;
+        }
+
+        public int[][] ConvertuintSudoku(uint[][] arrayToClone)
+        {
+            int[][] newArray = new int[arrayToClone.Length][];
+            for (int i = 0; i < newArray.Length; i++)
+            {
+                newArray[i] = (int[])arrayToClone[i].Clone();
+            }
+            return newArray;
+        }
+
+        public List<uint[][]> SolveSudoku(uint[][] sudoku,int x,int y) {
+            List<uint[][]> sudokuList = new List<uint[][]>();
             
             if (!CheckIfEmpty(sudoku, x, y))
             {
-                List<int> exclude = CheckX(sudoku, y);
+                List<uint> exclude = CheckX(sudoku, y);
                 exclude = AddList(exclude, CheckY(sudoku, x));
                 exclude.AddRange(CheckGrid(sudoku, 3, 3, x, y));
-                List<int> toAdd = RemoveNumbers(exclude, new List<int> { 1, 2, 3, 4, 5, 6, 7, 8, 9 });
+                List<uint> toAdd = RemoveNumbers(exclude, new List<uint> { 1, 2, 3, 4, 5, 6, 7, 8, 9 });
                 foreach (var item in toAdd)
                 {
                     sudokuList.Add(DeepClone(sudoku));
@@ -59,7 +81,7 @@ namespace SudokuSolver.Logics
             return sudokuList;
         }
 
-        public List<int> RemoveNumbers(List<int> exclude, List<int> toExcludeFrom)
+        public List<uint> RemoveNumbers(List<uint> exclude, List<uint> toExcludeFrom)
         {
             foreach (var item in exclude)
             {
@@ -71,23 +93,23 @@ namespace SudokuSolver.Logics
         }
 
         /// <summary>
-        /// Check if the given position int the given sudoku is empty.
+        /// Check if the given position uint the given sudoku is empty.
         /// </summary>
         /// <param name="sudoku"> The sudoku to check </param>
         /// <param name="x"> The x position to check </param>
         /// <param name="y"> The y position to check </param>
         /// <returns></returns>
-        public bool CheckIfEmpty(int[][] sudoku, int x, int y) {
+        public bool CheckIfEmpty(uint[][] sudoku, int x, int y) {
             return (sudoku[y][x] != 0);
         }
 
         /// <summary>
-        /// Take a int list(list1) and add it to the end of another list(list0).
+        /// Take a uint list(list1) and add it to the end of another list(list0).
         /// </summary>
         /// <param name="list0"> list to add to</param>
         /// <param name="list1"> list to add </param>
         /// <returns></returns>
-        public List<int> AddList(List<int> list0, List<int> list1) {
+        public List<uint> AddList(List<uint> list0, List<uint> list1) {
             foreach (var item in list1)
             {
                 list0.Add(item);
@@ -96,12 +118,12 @@ namespace SudokuSolver.Logics
         }
 
         /// <summary>
-        /// Take a int list(list1) and add it to the end of another list(list0).
+        /// Take a uint list(list1) and add it to the end of another list(list0).
         /// </summary>
         /// <param name="list0"> list to add to</param>
         /// <param name="list1"> list to add </param>
         /// <returns></returns>
-        public List<int[][]> AddList(List<int[][]> list0, List<int[][]> list1)
+        public List<uint[][]> AddList(List<uint[][]> list0, List<uint[][]> list1)
         {
             foreach (var item in list1)
             {
@@ -116,9 +138,9 @@ namespace SudokuSolver.Logics
         /// <param name="sudoku"> The sudoku to check </param>
         /// <param name="y"> The y coordinate of the row to check</param>
         /// <returns></returns>
-        public List<int> CheckX(int[][] sudoku, int y)
+        public List<uint> CheckX(uint[][] sudoku, int y)
         {
-            List<int> exclude = new List<int>();
+            List<uint> exclude = new List<uint>();
             for (int x = 0; x < sudoku.Length; x++)
             {
                 if (CheckIfEmpty(sudoku, x, y)) {
@@ -134,9 +156,9 @@ namespace SudokuSolver.Logics
         /// <param name="sudoku"> The sudoku to check </param>
         /// <param name="x"> The x coordinate of the collumn to check </param>
         /// <returns></returns>
-        public List<int> CheckY(int[][] sudoku, int x)
+        public List<uint> CheckY(uint[][] sudoku, int x)
         {
-            List<int> exclude = new List<int>();
+            List<uint> exclude = new List<uint>();
             for (int y = 0; y < sudoku.Length; y++)
             {
                 if (CheckIfEmpty(sudoku, x, y))
@@ -156,8 +178,8 @@ namespace SudokuSolver.Logics
         /// <param name="xPos"> The x position of the current grid </param>
         /// <param name="yPos"> The y position of the current grid </param>
         /// <returns></returns>
-        public List<int> CheckGrid(int[][] sudoku, int width,int height,int xPos,int yPos) {
-            List<int> exclude = new List<int>();
+        public List<uint> CheckGrid(uint[][] sudoku, int width,int height,int xPos,int yPos) {
+            List<uint> exclude = new List<uint>();
             for (int y = 0; y < height; y++)
             {
                 for (int x = 0; x < width; x++)
@@ -172,12 +194,12 @@ namespace SudokuSolver.Logics
             return exclude;
         }
 
-        public int[][] DeepClone(int[][] arrayToClone)
+        public uint[][] DeepClone(uint[][] arrayToClone)
         {
-            int[][] newArray = new int[arrayToClone.Length][];
+            uint[][] newArray = new uint[arrayToClone.Length][];
             for (int i = 0; i < newArray.Length; i++)
             {
-                newArray[i] = (int[])arrayToClone[i].Clone();
+                newArray[i] = (uint[])arrayToClone[i].Clone();
             }
             return newArray;
         }
